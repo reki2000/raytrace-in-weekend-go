@@ -11,3 +11,5 @@ make loop
 ```
 
 Please note that you need to have `make` installed in your system for the above command to work.
+
+![image](https://github.com/reki2000/raytrace-in-weekend-go/assets/2533597/a879e6e4-973b-4297-85ac-bccd83c0da10)
