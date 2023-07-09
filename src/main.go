@@ -97,11 +97,11 @@ func randomScene() core.ObjectList {
 
 func testScene() core.ObjectList {
 	world := core.ObjectList{
-		core.NewSphere(point3(0, 0, -1), 0.5, core.NewLambertian(color3(0.1, 0.2, 0.5))),
+		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(color3(0.1, 0.2, 0.5))),
 		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(color3(0.8, 0.8, 0.0))),
-		core.NewSphere(point3(1, 0, -1), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
-		core.NewSphere(point3(-1, 0, -1), 0.5, core.NewDielectric(1.5)),
-		core.NewSphere(point3(-1, 0, -1), -0.45, core.NewDielectric(1.5)),
+		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
+		core.NewSphere(point3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
+		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
 	}
 	return world
 }
@@ -125,7 +125,7 @@ func main() {
 	camera := core.NewCamera(aspectRatio, vfovDegree, aperture, distToFocus, lookFrom, lookAt, vup)
 
 	// locate objetcs
-	world := randomScene()
+	world := testScene()
 
 	// ray tracing settings
 	samples := 32
