@@ -19,7 +19,7 @@ func NewLambertian(albedo *Vec3) *lambertian {
 
 func (l *lambertian) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, *Vec3) {
 	scatterDirection := hr.Normal.Add(randomOnUnitShpere())
-	return true, &Ray{hr.P, scatterDirection}, l.Albedo
+	return true, NewRay(hr.P, scatterDirection, r.Time), l.Albedo
 }
 
 type metal struct {
@@ -37,7 +37,7 @@ func NewMetal(albedo *Vec3, fuzz double) *metal {
 
 func (m *metal) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, *Vec3) {
 	reflected := r.Direction.Norm().Reflect(hr.Normal)
-	scattered := &Ray{hr.P, reflected.Add(randomOnUnitShpere().Mul_(m.Fuzz))}
+	scattered := NewRay(hr.P, reflected.Add(randomOnUnitShpere().Mul_(m.Fuzz)), r.Time)
 	if (scattered.Direction.Dot(hr.Normal)) > 0 {
 		return true, scattered, m.Albedo
 	} else {
@@ -70,17 +70,17 @@ func (d *dielectric) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, *Vec3) {
 	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 	if etaIOverEtaT*sinTheta > 1.0 {
 		reflected := unitDirection.Reflect(hr.Normal)
-		return true, NewRay(hr.P, reflected), color3(1.0, 1.0, 1.0)
+		return true, NewRay(hr.P, reflected, r.Time), color3(1.0, 1.0, 1.0)
 	}
 
 	reflectProb := schlick(cosTheta, etaIOverEtaT)
 	if rand.Float64() < reflectProb {
 		reflected := unitDirection.Reflect(hr.Normal)
-		return true, NewRay(hr.P, reflected), color3(1.0, 1.0, 1.0)
+		return true, NewRay(hr.P, reflected, r.Time), color3(1.0, 1.0, 1.0)
 	}
 
 	refracted := unitDirection.Refract(hr.Normal, etaIOverEtaT)
-	return true, NewRay(hr.P, refracted), color3(1.0, 1.0, 1.0)
+	return true, NewRay(hr.P, refracted, r.Time), color3(1.0, 1.0, 1.0)
 }
 
 func schlick(cosine double, refIdx double) double {

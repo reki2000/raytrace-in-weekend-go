@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"image"
 	"image/color"
 	"image/png"
@@ -102,11 +103,15 @@ func testScene() core.ObjectList {
 		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
 		core.NewSphere(point3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
 		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
+		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(color3(0.0, 0.8, 0.8)), -4.0, 5.0),
 	}
 	return world
 }
 
 func main() {
+	scene := flag.String("scene", "random", "scene type")
+	flag.Parse()
+
 	seed := time.Now().UnixNano()
 	rand.Seed(seed)
 
@@ -122,10 +127,13 @@ func main() {
 	vup := point3(0, 1, 0)
 	distToFocus := 10.0
 	aperture := 0.1
-	camera := core.NewCamera(aspectRatio, vfovDegree, aperture, distToFocus, lookFrom, lookAt, vup)
+	camera := core.NewCamera(aspectRatio, vfovDegree, aperture, distToFocus, lookFrom, lookAt, vup, 0.0, 1.0)
 
 	// locate objetcs
 	world := testScene()
+	if *scene == "random" {
+		world = randomScene()
+	}
 
 	// ray tracing settings
 	samples := 32

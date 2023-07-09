@@ -12,11 +12,13 @@ type Camera struct {
 	vertical        *Vec3
 	lensRadius      double
 	u, v, w         *Vec3
+	time0, time1    double
 }
 
 func NewCamera(
 	aspectRatio, vfov, aperture, focusDist double,
-	lookFrom, lookAt, vup *Vec3) *Camera {
+	lookFrom, lookAt, vup *Vec3,
+	time0, time1 double) *Camera {
 	theta := vfov * math.Pi / 180
 	h := math.Tan(theta / 2)
 
@@ -33,7 +35,7 @@ func NewCamera(
 	lowerLeftCorner :=
 		origin.Sub(horizontal.Div(2)).Sub_(vertical.Div(2)).Sub_(w.Mul(focusDist))
 
-	return &Camera{origin, lowerLeftCorner, horizontal, vertical, aperture / 2, u, v, w}
+	return &Camera{origin, lowerLeftCorner, horizontal, vertical, aperture / 2, u, v, w, time0, time1}
 }
 
 func (c *Camera) GetRay(u, v double) *Ray {
@@ -42,7 +44,8 @@ func (c *Camera) GetRay(u, v double) *Ray {
 
 	return NewRay(
 		c.Origin.Add(offset),
-		c.LowerLeftCorner.Add(c.horizontal.Mul(u)).Add_(c.vertical.Mul(v)).Sub_(c.Origin).Sub_(offset))
+		c.LowerLeftCorner.Add(c.horizontal.Mul(u)).Add_(c.vertical.Mul(v)).Sub_(c.Origin).Sub_(offset),
+		rand.Float64()*(c.time1-c.time0)+c.time0)
 }
 
 func randomInUnitDisk() *Vec3 {
