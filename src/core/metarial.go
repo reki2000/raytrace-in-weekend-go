@@ -54,7 +54,7 @@ func NewDielectric(refIdx double) *dielectric {
 }
 
 func color3(r, g, b double) *Vec3 {
-	return &Vec3{r, g, b}
+	return NewVec3(r, g, b)
 }
 
 func (d *dielectric) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, *Vec3) {
@@ -93,5 +93,5 @@ func randomOnUnitShpere() *Vec3 {
 	a := rand.Float64() * 2.0 * math.Pi
 	z := rand.Float64()*2.0 - 1.0
 	r := math.Sqrt(1 - z*z)
-	return &Vec3{r * math.Cos(a), r * math.Sin(a), z}
+	return NewVec3(r*math.Cos(a), r*math.Sin(a), z)
 }

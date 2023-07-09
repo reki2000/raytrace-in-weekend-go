@@ -1,12 +1,12 @@
 package core
 
 type Object interface {
-	Hit(r *Ray, tMin double, tMax double) (bool, *HitRecord)
+	Hit(r *Ray, tMin, tMax double) (bool, *HitRecord)
 }
 
 type ObjectList []Object
 
-func (objs ObjectList) Hit(r *Ray, tMin double, tMax double) (bool, *HitRecord) {
+func (objs ObjectList) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	hitAny := false
 	closestSoFar := tMax
 	var hitRecord *HitRecord

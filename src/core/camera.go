@@ -31,7 +31,7 @@ func NewCamera(
 	horizontal := u.Mul(viewportWidth)
 	vertical := v.Mul(viewportHeight)
 	lowerLeftCorner :=
-		origin.Sub(horizontal.Div(2)).Sub(vertical.Div(2)).Sub(w.Mul(focusDist))
+		origin.Sub(horizontal.Div(2)).Sub_(vertical.Div(2)).Sub_(w.Mul(focusDist))
 
 	return &Camera{origin, lowerLeftCorner, horizontal, vertical, aperture / 2, u, v, w}
 }

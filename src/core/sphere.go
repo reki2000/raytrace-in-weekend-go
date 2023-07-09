@@ -8,12 +8,12 @@ type sphere struct {
 	material Material
 }
 
-func (s *sphere) Hit(r *Ray, tMin double, tMax double) (bool, *HitRecord) {
+func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	// (P(t) - C) * (P(t) - C) = r^2
 	// (A + tb - C) * (A + tb - C) = r^2
 	// t^2 b^2 + 2tb(A-C) + (A-C)(A-C) - r^2 = 0
 	oc := r.Origin.Sub(s.center) // A-C
-	a := r.Direction.Dot(r.Direction)
+	a := r.Direction.LengthSquared()
 	halfB := oc.Dot(r.Direction)
 	c := oc.LengthSquared() - s.radius*s.radius // (A-C)(A-C) - r^2
 	discriminant := halfB*halfB - a*c
