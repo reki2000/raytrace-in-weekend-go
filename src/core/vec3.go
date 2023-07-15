@@ -11,6 +11,18 @@ type Vec3 struct {
 	X, Y, Z double
 }
 
+func (v Vec3) E(axis int) double {
+	switch axis {
+	case 0:
+		return v.X
+	case 1:
+		return v.Y
+	case 2:
+		return v.Z
+	}
+	panic("invalid axis")
+}
+
 func (v Vec3) Inv() *Vec3           { return NewVec3(-v.X, -v.Y, -v.Z) }
 func (v Vec3) Add(x *Vec3) *Vec3    { return NewVec3(v.X+x.X, v.Y+x.Y, v.Z+x.Z) }
 func (v Vec3) Sub(x *Vec3) *Vec3    { return NewVec3(v.X-x.X, v.Y-x.Y, v.Z-x.Z) }

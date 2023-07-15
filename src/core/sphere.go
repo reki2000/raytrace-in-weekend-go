@@ -3,21 +3,20 @@ package core
 import "math"
 
 type sphere struct {
-	center1, center2 *Vec3
-	radius           double
-	material         Material
-	time0, time1     double
+	center   *Vec3
+	radius   double
+	material Material
 }
 
-func (s *sphere) Center(t double) *Vec3 {
-	return s.center1.Add(s.center2.Sub(s.center1).Mul((s.time1 - t) / (s.time1 - s.time0)))
+func NewSphere(center *Vec3, radius double, mat Material) *sphere {
+	return &sphere{center, radius, mat}
 }
 
 func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	// (P(t) - C) * (P(t) - C) = r^2
 	// (A + tb - C) * (A + tb - C) = r^2
 	// t^2 b^2 + 2tb(A-C) + (A-C)(A-C) - r^2 = 0
-	center := s.Center(r.Time)
+	center := s.center
 	oc := r.Origin.Sub(center) // A-C
 	a := r.Direction.LengthSquared()
 	halfB := oc.Dot(r.Direction)
@@ -45,10 +44,8 @@ func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	return false, nil
 }
 
-func NewSphere(center *Vec3, radius double, mat Material) *sphere {
-	return &sphere{center, center, radius, mat, -1.0, 1.0}
-}
-
-func NewMovingSphere(center1, center2 *Vec3, radius double, mat Material, time0, time1 double) *sphere {
-	return &sphere{center1, center2, radius, mat, time0, time1}
+func (s *sphere) BoundingBox(t0, t1 double) (bool, *Aabb) {
+	return true, NewAabb(
+		s.center.Sub(NewVec3(s.radius, s.radius, s.radius)),
+		s.center.Add(NewVec3(s.radius, s.radius, s.radius)))
 }

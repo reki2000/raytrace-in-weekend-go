@@ -2,6 +2,7 @@ package core
 
 type Object interface {
 	Hit(r *Ray, tMin, tMax double) (bool, *HitRecord)
+	BoundingBox(t0, t1 double) (bool, *Aabb)
 }
 
 type ObjectList []Object
@@ -20,6 +21,31 @@ func (objs ObjectList) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	}
 
 	return hitAny, hitRecord
+}
+
+func (objs ObjectList) BoundingBox(t0, t1 double) (bool, *Aabb) {
+	if len(objs) == 0 {
+		return false, nil
+	}
+
+	var outputBox *Aabb
+	firstBox := true
+
+	for _, obj := range objs {
+		ok, tempBox := obj.BoundingBox(t0, t1)
+		if !ok {
+			return false, nil
+		}
+
+		if firstBox {
+			outputBox = tempBox
+		} else {
+			outputBox = NewSurroundingBox(outputBox, tempBox)
+		}
+		firstBox = false
+	}
+
+	return true, outputBox
 }
 
 type HitRecord struct {

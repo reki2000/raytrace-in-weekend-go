@@ -80,6 +80,8 @@ func randomScene() core.ObjectList {
 			}
 		}
 	}
+	bvh := core.NewBvhNode(world, 0.0, 1.0)
+	world = core.ObjectList{bvh}
 
 	groundMaterial := core.NewLambertian(color3(0.5, 0.5, 0.5))
 	world = append(world, core.NewSphere(point3(0, -1000, 0), 1000, groundMaterial))
@@ -105,7 +107,9 @@ func testScene() core.ObjectList {
 		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
 		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(color3(0.0, 0.8, 0.8)), -4.0, 5.0),
 	}
-	return world
+
+	bvh := core.NewBvhNode(world, 0.0, 1.0)
+	return core.ObjectList{bvh}
 }
 
 func main() {
@@ -134,6 +138,7 @@ func main() {
 	if *scene == "random" {
 		world = randomScene()
 	}
+	//fmt.Fprintf(os.Stderr, "world: %s\n", world)
 
 	// ray tracing settings
 	samples := 32
