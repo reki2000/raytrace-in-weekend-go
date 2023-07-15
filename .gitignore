@@ -1,2 +1,4 @@
 *.png
 prof/
+.tool-versions
+bin/
