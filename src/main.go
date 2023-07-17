@@ -99,7 +99,9 @@ func randomScene() core.ObjectList {
 }
 
 func testScene() core.ObjectList {
-	groundTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
+	// groundTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
+	groundTextture := core.NewNoiseTexture(1.0)
+
 	world := core.ObjectList{
 		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(groundTextture)),
 

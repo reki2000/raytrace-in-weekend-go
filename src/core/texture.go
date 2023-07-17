@@ -38,3 +38,16 @@ func (ct *CheckerTexture) Value(u, v float64, p *Vec3) *Vec3 {
 		return ct.even.Value(u, v, p)
 	}
 }
+
+type NoiseTexture struct {
+	scale  float64
+	perlin Perlin
+}
+
+func NewNoiseTexture(scale float64) *NoiseTexture {
+	return &NoiseTexture{scale, *NewPerlin()}
+}
+
+func (nt *NoiseTexture) Value(u, v float64, p *Vec3) *Vec3 {
+	return NewVec3(1, 1, 1).Mul_(nt.perlin.Noise(p))
+}
