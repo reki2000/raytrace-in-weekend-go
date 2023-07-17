@@ -3,17 +3,17 @@ package core
 import "math"
 
 type Aabb struct {
-	Min, Max *Vec3
+	Min, Max Vec3
 }
 
-func NewAabb(a, b *Vec3) *Aabb {
+func NewAabb(a, b Vec3) *Aabb {
 	return &Aabb{a, b}
 }
 
 func (a *Aabb) Hit(r *Ray, tMin, tMax double) bool {
-	return hit(a.Min.X-r.Origin.X, a.Max.X-r.Origin.X, r.invDirection.X, tMin, tMax) &&
-		hit(a.Min.Y-r.Origin.Y, a.Max.Y-r.Origin.Y, r.invDirection.Y, tMin, tMax) &&
-		hit(a.Min.Z-r.Origin.Z, a.Max.Z-r.Origin.Z, r.invDirection.Z, tMin, tMax)
+	return hit(a.Min.x-r.Origin.x, a.Max.x-r.Origin.x, r.invDirection.x, tMin, tMax) &&
+		hit(a.Min.y-r.Origin.y, a.Max.y-r.Origin.y, r.invDirection.y, tMin, tMax) &&
+		hit(a.Min.z-r.Origin.z, a.Max.z-r.Origin.z, r.invDirection.z, tMin, tMax)
 }
 
 func hit(aabbMin, aabbMax, inv, tMin, tMax double) bool {
@@ -38,14 +38,14 @@ func hit(aabbMin, aabbMax, inv, tMin, tMax double) bool {
 
 func NewSurroundingBox(box0, box1 *Aabb) *Aabb {
 	small := NewVec3(
-		math.Min(box0.Min.X, box1.Min.X),
-		math.Min(box0.Min.Y, box1.Min.Y),
-		math.Min(box0.Min.Z, box1.Min.Z),
+		math.Min(box0.Min.x, box1.Min.x),
+		math.Min(box0.Min.y, box1.Min.y),
+		math.Min(box0.Min.z, box1.Min.z),
 	)
 	big := NewVec3(
-		math.Max(box0.Max.X, box1.Max.X),
-		math.Max(box0.Max.Y, box1.Max.Y),
-		math.Max(box0.Max.Z, box1.Max.Z),
+		math.Max(box0.Max.x, box1.Max.x),
+		math.Max(box0.Max.y, box1.Max.y),
+		math.Max(box0.Max.z, box1.Max.z),
 	)
 	return NewAabb(small, big)
 }

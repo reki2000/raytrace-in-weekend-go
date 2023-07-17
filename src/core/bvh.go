@@ -21,7 +21,7 @@ func createBoxComparator(axis int, time0, time1 double) func(a, b Object) int {
 		}
 
 		debug("comparing %v %v", boxA.Min, boxB.Min)
-		diff := boxA.Min.E(axis) - boxB.Min.E(axis)
+		diff := boxA.Min.e(axis) - boxB.Min.e(axis)
 		if diff < 0.0 {
 			return -1
 		} else if diff > 0.0 {
@@ -59,7 +59,7 @@ func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
 		// log := fmt.Sprintf("axis: %d ", axis)
 		// for _, v := range objects {
 		// 	_, box := v.BoundingBox(time0, time1)
-		// 	log += fmt.Sprintf(" %0.2f,%0.2f,%0.2f ", box.Min.X, box.Min.Y, box.Min.Z)
+		// 	log += fmt.Sprintf(" %0.2f,%0.2f,%0.2f ", box.Min.x, box.Min.y, box.Min.z)
 		// }
 		// info(log)
 
@@ -106,8 +106,8 @@ func (b *BvhNode) String() string {
 func (b *BvhNode) Show(indent int) string {
 	buf := fmt.Sprintf("%s [[%0.2f,%0.2f,%0.2f], [%0.2f,%0.2f,%0.2f]],\n",
 		strings.Repeat(" ", indent),
-		b.box.Min.X, b.box.Min.Y, b.box.Min.Z,
-		b.box.Max.X, b.box.Max.Y, b.box.Max.Z)
+		b.box.Min.x, b.box.Min.y, b.box.Min.z,
+		b.box.Max.x, b.box.Max.y, b.box.Max.z)
 	if node, ok := b.left.(*BvhNode); ok {
 		buf += node.Show(indent + 1)
 	}

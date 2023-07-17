@@ -10,7 +10,7 @@ type Perlin struct {
 	permX           []int
 	permY           []int
 	permZ           []int
-	randomVec       []*Vec3
+	randomVec       []Vec3
 	turbulanceDepth int
 }
 
@@ -21,10 +21,10 @@ func NewPerlin() *Perlin {
 	permY := permutate(series)
 	permZ := permutate(series)
 
-	randomVec := make([]*Vec3, pointCount)
+	randomVec := make([]Vec3, pointCount)
 
 	for i := 0; i < pointCount; i++ {
-		randomVec[i] = NewVec3Random(-1, 1).Norm()
+		randomVec[i] = NewVec3Random(-1, 1).norm()
 	}
 
 	turbulanceDepth := 7
@@ -49,7 +49,7 @@ func permutate(slice []int) []int {
 	return slice
 }
 
-func perlinInterporlate(c [2][2][2]*Vec3, u, v, w double) double {
+func perlinInterporlate(c [2][2][2]Vec3, u, v, w double) double {
 	// 3d hermite cubic
 	uu := u * u * (3 - 2*u)
 	vv := v * v * (3 - 2*v)
@@ -65,28 +65,28 @@ func perlinInterporlate(c [2][2][2]*Vec3, u, v, w double) double {
 				weight := NewVec3(u-ii, v-jj, w-kk)
 				accum += (ii*uu + (1-ii)*(1-uu)) *
 					(jj*vv + (1-jj)*(1-vv)) *
-					(kk*ww + (1-kk)*(1-ww)) * weight.Dot(c[i][j][k])
+					(kk*ww + (1-kk)*(1-ww)) * weight.dot(c[i][j][k])
 			}
 		}
 	}
 	return accum
 }
 
-func (perlin *Perlin) Noise(p *Vec3) double {
-	u := p.X - math.Floor(p.X)
-	v := p.Y - math.Floor(p.Y)
-	w := p.Z - math.Floor(p.Z)
+func (perlin Perlin) Noise(p Vec3) double {
+	u := p.x - math.Floor(p.x)
+	v := p.y - math.Floor(p.y)
+	w := p.z - math.Floor(p.z)
 
 	// 3d hermite cubic
 	u = u * u * (3 - 2*u)
 	v = v * v * (3 - 2*v)
 	w = w * w * (3 - 2*w)
 
-	c := [2][2][2]*Vec3{}
+	c := [2][2][2]Vec3{}
 
-	i := int(math.Floor(p.X))
-	j := int(math.Floor(p.Y))
-	k := int(math.Floor(p.Z))
+	i := int(math.Floor(p.x))
+	j := int(math.Floor(p.y))
+	k := int(math.Floor(p.z))
 
 	for di := 0; di < 2; di++ {
 		for dj := 0; dj < 2; dj++ {
@@ -102,14 +102,14 @@ func (perlin *Perlin) Noise(p *Vec3) double {
 
 }
 
-func (perlin *Perlin) Turbulance(p *Vec3) double {
+func (perlin *Perlin) Turbulance(p Vec3) double {
 	accum := 0.0
 	tempP := p
 	weight := 1.0
 	for i := 0; i < perlin.turbulanceDepth; i++ {
 		accum += weight * perlin.Noise(tempP)
 		weight *= 0.5
-		tempP = tempP.Mul(2)
+		tempP = tempP.mul(2)
 	}
 	return math.Abs(accum)
 }

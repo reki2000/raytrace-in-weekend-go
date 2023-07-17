@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -16,42 +17,12 @@ import (
 
 type double = float64
 
-func color3(r, g, b double) *core.Vec3 {
-	return core.NewVec3(r, g, b)
+func c3(r, g, b double) core.Color {
+	return core.NewColor(r, g, b)
 }
 
-func point3(x, y, z double) *core.Vec3 {
+func p3(x, y, z double) core.Vec3 {
 	return core.NewVec3(x, y, z)
-}
-
-func randomInUnitSphere() *core.Vec3 {
-	for {
-		p := core.NewVec3Random(-1, 1)
-		if p.LengthSquared() >= 1 {
-			continue
-		}
-		return p
-	}
-}
-
-func rayColor(r *core.Ray, world core.ObjectList, depth int) *core.Vec3 {
-	if depth <= 0 {
-		return color3(0, 0, 0)
-	}
-
-	if hit, hr := world.Hit(r, 0.001, math.Inf(0)); hit {
-		if scattered, scatter, attenuation := hr.Mat.Scatter(r, hr); scattered {
-			return rayColor(scatter, world, depth-1).MulVec(attenuation)
-		} else {
-			return color3(0, 0, 0)
-		}
-	}
-
-	unitDirection := r.Direction.Norm()
-	t := 0.5 * (unitDirection.Y + 1.0)
-	v1 := color3(1.0, 1.0, 1.0)
-	v2 := color3(0.5, 0.7, 1.0)
-	return v1.Mul_(1.0 - t).Add_(v2.Mul_(t))
 }
 
 func randomScene() core.ObjectList {
@@ -60,17 +31,17 @@ func randomScene() core.ObjectList {
 	for a := -11; a < 11; a++ {
 		for b := -11; b < 11; b++ {
 			chooseMat := rand.Float64()
-			center := point3(double(a)+0.9*rand.Float64(), 0.2, double(b)+0.9*rand.Float64())
+			center := p3(double(a)+0.9*rand.Float64(), 0.2, double(b)+0.9*rand.Float64())
 
-			if center.Sub(point3(4, 0.2, 0)).Length() > 0.9 {
+			if center.Sub(p3(4, 0.2, 0)).Length() > 0.9 {
 				var material core.Material
 				if chooseMat < 0.8 {
 					// diffuse
-					albedo := core.NewVec3Random(0.0, 1.0).MulVec(core.NewVec3Random(0.0, 1.0))
+					albedo := core.NewColorRandom(0.0, 1.0).MulVec(core.NewColorRandom(0.0, 1.0))
 					material = core.NewLambertian(core.NewSolidColor(albedo))
 				} else if chooseMat < 0.95 {
 					// metal
-					albedo := core.NewVec3Random(0.5, 1)
+					albedo := core.NewColorRandom(0.5, 1)
 					fuzz := rand.Float64() * 0.5
 					material = core.NewMetal(albedo, fuzz)
 				} else {
@@ -84,28 +55,33 @@ func randomScene() core.ObjectList {
 	bvh := core.NewBvhNode(world, 0.0, 1.0)
 	world = core.ObjectList{bvh}
 
-	groundMaterial := core.NewLambertian(core.NewSolidColorRGB(0.5, 0.5, 0.5))
-	world = append(world, core.NewSphere(point3(0, -1000, 0), 1000, groundMaterial))
+	groundMaterial := core.NewLambertian(core.NewSolidColor(c3(0.5, 0.5, 0.5)))
+	world = append(world, core.NewSphere(p3(0, -1000, 0), 1000, groundMaterial))
 
 	material1 := core.NewDielectric(1.5)
-	material2 := core.NewLambertian(core.NewSolidColorRGB(0.4, 0.2, 0.1))
-	material3 := core.NewMetal(color3(0.7, 0.6, 0.5), 0.0)
+	material2 := core.NewLambertian(core.NewSolidColor(c3(0.4, 0.2, 0.1)))
+	material3 := core.NewMetal(c3(0.7, 0.6, 0.5), 0.0)
 	world = append(world,
-		core.NewSphere(point3(0, 1, 0), 1.0, material1),
-		core.NewSphere(point3(-4, 1, 0), 1.0, material2),
-		core.NewSphere(point3(4, 1, 0), 1.0, material3),
+		core.NewSphere(p3(0, 1, 0), 1.0, material1),
+		core.NewSphere(p3(-4, 1, 0), 1.0, material2),
+		core.NewSphere(p3(4, 1, 0), 1.0, material3),
 	)
 
 	return world
 }
 
 func testScene() core.ObjectList {
-	checkerTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
+	checkerTextture := core.NewCheckerTexture(core.NewSolidColor(c3(0.2, 0.3, 0.1)), core.NewSolidColor(c3(0.9, 0.9, 0.9)))
 	//noiseTextture := core.NewNoiseTexture(5.0)
 	marbleTextture := core.NewTurbulanceNoiseTexture(5.0, 20)
 	//blueTexture := core.NewSolidColorRGB(0.1, 0.2, 0.5)
 
-	file, _ := os.Open("resource/earthmap.jpg")
+	file, err := os.Open("resource/earthmap.jpg")
+	if err != nil {
+		pwd, _ := os.Getwd()
+		fmt.Fprintf(os.Stderr, "pwd: %s", pwd)
+		panic(err)
+	}
 	defer file.Close()
 
 	image, _, err := image.Decode(file)
@@ -115,18 +91,18 @@ func testScene() core.ObjectList {
 	earthTexture := core.NewImageTexture(image)
 
 	world := core.ObjectList{
-		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(checkerTextture)),
+		core.NewSphere(p3(0, -100.5, -1), 100, core.NewLambertian(checkerTextture)),
 
-		core.NewSphere(point3(0, 0.15, 0), 0.7, core.NewLambertian(earthTexture)),
+		core.NewSphere(p3(0, 0.15, 0), 0.7, core.NewLambertian(earthTexture)),
 
-		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.2)),
+		core.NewSphere(p3(0, 0, -1.2), 0.5, core.NewMetal(c3(0.8, 0.6, 0.2), 0.2)),
 
-		core.NewSphere(point3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
-		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
+		core.NewSphere(p3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
+		core.NewSphere(p3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
 
-		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(core.NewSolidColorRGB(0.0, 0.8, 0.8)), -4.0, 5.0),
+		core.NewMovingSphere(p3(2, -0.3, 1), p3(2, -0.3, -1), 0.2, core.NewLambertian(core.NewSolidColor(c3(0.0, 0.8, 0.8))), -4.0, 5.0),
 
-		core.NewSphere(point3(-4, 0, 1.4), 0.5, core.NewLambertian(marbleTextture)),
+		core.NewSphere(p3(-4, 0, 1.4), 0.5, core.NewLambertian(marbleTextture)),
 	}
 
 	bvh := core.NewBvhNode(world, 0.0, 1.0)
@@ -147,12 +123,13 @@ func main() {
 
 	// camera settings
 	vfovDegree := 90.0
-	lookFrom := point3(13, 2, 3)
-	lookAt := point3(0, 0, 0)
-	vup := point3(0, 1, 0)
+	lookFrom := p3(13, 2, 3)
+	lookAt := p3(0, 0, 0)
+	vup := p3(0, 1, 0)
 	distToFocus := 10.0
 	aperture := 0.1
-	camera := core.NewCamera(aspectRatio, vfovDegree, aperture, distToFocus, lookFrom, lookAt, vup, 0.0, 1.0)
+	time0, time1 := 0.0, 1.0
+	camera := core.NewCamera(aspectRatio, vfovDegree, aperture, distToFocus, lookFrom, lookAt, vup, time0, time1)
 
 	// locate objetcs
 	world := testScene()
@@ -170,14 +147,14 @@ func main() {
 
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
-			pixelColor := color3(0, 0, 0)
+			pixelColor := c3(0, 0, 0)
 
 			for s := 0; s < samples; s++ {
 				u := (double(i) + rand.Float64()) / double(imageWidth-1)
 				v := (double(j) + rand.Float64()) / double(imageHeight-1)
 				r := camera.GetRay(u, v)
 
-				pixelColor.Add_(rayColor(r, world, maxDepth))
+				pixelColor = pixelColor.Add(core.RayColor(r, world, maxDepth))
 			}
 
 			r, g, b := antiAlias(pixelColor, samples)
@@ -188,9 +165,9 @@ func main() {
 	png.Encode(os.Stdout, buffer)
 }
 
-func antiAlias(c *core.Vec3, samples int) (uint8, uint8, uint8) {
-	r := uint8(math.Min(math.Sqrt(c.X/double(samples)), 0.999) * 256.0)
-	g := uint8(math.Min(math.Sqrt(c.Y/double(samples)), 0.999) * 256.0)
-	b := uint8(math.Min(math.Sqrt(c.Z/double(samples)), 0.999) * 256.0)
+func antiAlias(c core.Color, samples int) (uint8, uint8, uint8) {
+	r := uint8(math.Min(math.Sqrt(c.R/double(samples)), 0.999) * 256.0)
+	g := uint8(math.Min(math.Sqrt(c.G/double(samples)), 0.999) * 256.0)
+	b := uint8(math.Min(math.Sqrt(c.B/double(samples)), 0.999) * 256.0)
 	return r, g, b
 }
