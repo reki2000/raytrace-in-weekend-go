@@ -45,7 +45,8 @@ func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 }
 
 func (s *sphere) BoundingBox(t0, t1 double) (bool, *Aabb) {
+	radius := math.Abs(s.radius)
 	return true, NewAabb(
-		s.center.Sub(NewVec3(s.radius, s.radius, s.radius)),
-		s.center.Add(NewVec3(s.radius, s.radius, s.radius)))
+		s.center.Sub(NewVec3(radius, radius, radius)),
+		s.center.Add(NewVec3(radius, radius, radius)))
 }
