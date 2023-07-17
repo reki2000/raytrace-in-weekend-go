@@ -1,6 +1,9 @@
 package core
 
-import "math"
+import (
+	"image"
+	"math"
+)
 
 type Texture interface {
 	Value(u, v float64, p *Vec3) *Vec3
@@ -64,4 +67,53 @@ func NewTurbulanceNoiseTexture(scale float64, period float64) *TurbulanceNoiseTe
 
 func (nt *TurbulanceNoiseTexture) Value(u, v float64, p *Vec3) *Vec3 {
 	return NewVec3(0.5, 0.5, 0.5).Mul_(1 + math.Sin(nt.scale*p.Z+nt.period*nt.perlin.Turbulance(p)))
+}
+
+type ImageTexture struct {
+	width, height int
+	data          []Vec3
+}
+
+func NewImageTexture(src image.Image) *ImageTexture {
+	width := src.Bounds().Dx()
+	height := src.Bounds().Dy()
+	data := make([]Vec3, height*width)
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			r, g, b, _ := src.At(x, y).RGBA()
+			data[y*width+x] = Vec3{double(r) / 65535, double(g) / 65535, double(b) / 65535}
+		}
+	}
+	return &ImageTexture{width, height, data}
+}
+
+func (it *ImageTexture) Value(u, v float64, p *Vec3) *Vec3 {
+	if it.data == nil {
+		return NewVec3(0, 1, 1)
+	}
+
+	u = clamp(u, 0, 1)
+	v = 1 - clamp(v, 0, 1)
+
+	i := int(u * double(it.width))
+	j := int(v * double(it.height))
+
+	if i >= it.width {
+		i = it.width - 1
+	}
+	if j >= it.height {
+		j = it.height - 1
+	}
+
+	return &it.data[j*it.width+i]
+}
+
+func clamp(x, min, max double) double {
+	if x < min {
+		return min
+	}
+	if x > max {
+		return max
+	}
+	return x
 }

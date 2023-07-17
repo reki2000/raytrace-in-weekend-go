@@ -35,14 +35,16 @@ func (s *movingSphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 		if temp < tMax && temp > tMin {
 			p := r.At(temp)
 			outwardNormal := p.Sub(center).Div_(s.radius)
-			return true, NewHitRecord(temp, p, r, outwardNormal, s.material)
+			u, v := getSphereUv(*outwardNormal)
+			return true, NewHitRecord(temp, p, u, v, r, outwardNormal, s.material)
 		}
 
 		temp = (-halfB + root) / a
 		if temp < tMax && temp > tMin {
 			p := r.At(temp)
 			outwardNormal := p.Sub(center).Div_(s.radius)
-			return true, NewHitRecord(temp, p, r, outwardNormal, s.material)
+			u, v := getSphereUv(*outwardNormal)
+			return true, NewHitRecord(temp, p, u, v, r, outwardNormal, s.material)
 		}
 	}
 

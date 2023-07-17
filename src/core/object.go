@@ -57,8 +57,8 @@ type HitRecord struct {
 	u, v      double
 }
 
-func NewHitRecord(t double, p *Vec3, r *Ray, outwardNormal *Vec3, material Material) *HitRecord {
-	hr := &HitRecord{T: t, P: p, Mat: material}
+func NewHitRecord(t double, p *Vec3, u, v double, r *Ray, outwardNormal *Vec3, material Material) *HitRecord {
+	hr := &HitRecord{T: t, P: p, Mat: material, u: u, v: v}
 	hr.setFaceNormal(r, outwardNormal)
 	return hr
 }

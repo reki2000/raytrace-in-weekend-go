@@ -4,6 +4,7 @@ import (
 	"flag"
 	"image"
 	"image/color"
+	_ "image/jpeg"
 	"image/png"
 	"math"
 	"math/rand"
@@ -104,17 +105,28 @@ func testScene() core.ObjectList {
 	marbleTextture := core.NewTurbulanceNoiseTexture(5.0, 20)
 	//blueTexture := core.NewSolidColorRGB(0.1, 0.2, 0.5)
 
+	file, _ := os.Open("resource/earthmap.jpg")
+	defer file.Close()
+
+	image, _, err := image.Decode(file)
+	if err != nil {
+		panic(err)
+	}
+	earthTexture := core.NewImageTexture(image)
+
 	world := core.ObjectList{
 		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(checkerTextture)),
 
-		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(marbleTextture)),
+		core.NewSphere(point3(0, 0.15, 0), 0.7, core.NewLambertian(earthTexture)),
 
-		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
+		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.2)),
 
 		core.NewSphere(point3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
 		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
 
 		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(core.NewSolidColorRGB(0.0, 0.8, 0.8)), -4.0, 5.0),
+
+		core.NewSphere(point3(-4, 0, 1.4), 0.5, core.NewLambertian(marbleTextture)),
 	}
 
 	bvh := core.NewBvhNode(world, 0.0, 1.0)
