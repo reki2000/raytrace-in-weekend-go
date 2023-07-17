@@ -37,15 +37,15 @@ func hit(aabbMin, aabbMax, inv, tMin, tMax double) bool {
 }
 
 func NewSurroundingBox(box0, box1 *Aabb) *Aabb {
-	small := &Vec3{
+	small := NewVec3(
 		math.Min(box0.Min.X, box1.Min.X),
 		math.Min(box0.Min.Y, box1.Min.Y),
 		math.Min(box0.Min.Z, box1.Min.Z),
-	}
-	big := &Vec3{
+	)
+	big := NewVec3(
 		math.Max(box0.Max.X, box1.Max.X),
 		math.Max(box0.Max.Y, box1.Max.Y),
 		math.Max(box0.Max.Z, box1.Max.Z),
-	}
+	)
 	return NewAabb(small, big)
 }
