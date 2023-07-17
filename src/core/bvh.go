@@ -14,13 +14,13 @@ type BvhNode struct {
 
 func createBoxComparator(axis int, time0, time1 double) func(a, b Object) int {
 	return func(a, b Object) int {
-		log("comparing %v %v", a, b)
 		okA, boxA := a.BoundingBox(time0, time1)
 		okB, boxB := b.BoundingBox(time0, time1)
 		if !okA || !okB {
 			panic("no bounding box in bvh_node constructor")
 		}
 
+		debug("comparing %v %v", boxA.Min, boxB.Min)
 		diff := boxA.Min.E(axis) - boxB.Min.E(axis)
 		if diff < 0.0 {
 			return -1
@@ -32,7 +32,7 @@ func createBoxComparator(axis int, time0, time1 double) func(a, b Object) int {
 }
 
 func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
-	log("NewBvhNode %v", objects)
+	debug("NewBvhNode %v", objects)
 
 	axis := rand.Int() % 3
 	comparator := createBoxComparator(axis, time0, time1)
@@ -41,7 +41,9 @@ func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
 	var right Object
 
 	span := len(objects)
-	if span == 1 {
+	if span == 0 {
+		panic("span 0")
+	} else if span == 1 {
 		left = objects[0]
 		right = objects[0]
 	} else if span == 2 {
@@ -54,6 +56,12 @@ func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
 		}
 	} else {
 		sort.Slice(objects, func(i, j int) bool { return comparator(objects[i], objects[j]) < 0 })
+		// log := fmt.Sprintf("axis: %d ", axis)
+		// for _, v := range objects {
+		// 	_, box := v.BoundingBox(time0, time1)
+		// 	log += fmt.Sprintf(" %0.2f,%0.2f,%0.2f ", box.Min.X, box.Min.Y, box.Min.Z)
+		// }
+		// info(log)
 
 		mid := span / 2
 		left = NewBvhNode(objects[:mid], time0, time1)
@@ -96,7 +104,7 @@ func (b *BvhNode) String() string {
 }
 
 func (b *BvhNode) Show(indent int) string {
-	buf := fmt.Sprintf("%s (%0.2f,%0.2f,%0.2f)-(%0.2f,%0.2f,%0.2f)\n",
+	buf := fmt.Sprintf("%s [[%0.2f,%0.2f,%0.2f], [%0.2f,%0.2f,%0.2f]],\n",
 		strings.Repeat(" ", indent),
 		b.box.Min.X, b.box.Min.Y, b.box.Min.Z,
 		b.box.Max.X, b.box.Max.Y, b.box.Max.Z)
