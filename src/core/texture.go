@@ -49,5 +49,19 @@ func NewNoiseTexture(scale float64) *NoiseTexture {
 }
 
 func (nt *NoiseTexture) Value(u, v float64, p *Vec3) *Vec3 {
-	return NewVec3(1, 1, 1).Mul_(nt.perlin.Noise(p))
+	return NewVec3(0.5, 0.5, 0.5).Mul_(1 + nt.perlin.Noise(p.Mul(nt.scale)))
+}
+
+type TurbulanceNoiseTexture struct {
+	scale  float64
+	period float64
+	perlin Perlin
+}
+
+func NewTurbulanceNoiseTexture(scale float64, period float64) *TurbulanceNoiseTexture {
+	return &TurbulanceNoiseTexture{scale, period, *NewPerlin()}
+}
+
+func (nt *TurbulanceNoiseTexture) Value(u, v float64, p *Vec3) *Vec3 {
+	return NewVec3(0.5, 0.5, 0.5).Mul_(1 + math.Sin(nt.scale*p.Z+nt.period*nt.perlin.Turbulance(p)))
 }

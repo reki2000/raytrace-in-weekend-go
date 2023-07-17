@@ -99,13 +99,15 @@ func randomScene() core.ObjectList {
 }
 
 func testScene() core.ObjectList {
-	// groundTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
-	groundTextture := core.NewNoiseTexture(1.0)
+	checkerTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
+	//noiseTextture := core.NewNoiseTexture(5.0)
+	marbleTextture := core.NewTurbulanceNoiseTexture(5.0, 20)
+	//blueTexture := core.NewSolidColorRGB(0.1, 0.2, 0.5)
 
 	world := core.ObjectList{
-		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(groundTextture)),
+		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(checkerTextture)),
 
-		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(core.NewSolidColorRGB(0.1, 0.2, 0.5))),
+		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(marbleTextture)),
 
 		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
 
