@@ -66,7 +66,7 @@ func randomScene() core.ObjectList {
 				if chooseMat < 0.8 {
 					// diffuse
 					albedo := core.NewVec3Random(0.0, 1.0).MulVec(core.NewVec3Random(0.0, 1.0))
-					material = core.NewLambertian(albedo)
+					material = core.NewLambertian(core.NewSolidColor(albedo))
 				} else if chooseMat < 0.95 {
 					// metal
 					albedo := core.NewVec3Random(0.5, 1)
@@ -83,11 +83,11 @@ func randomScene() core.ObjectList {
 	bvh := core.NewBvhNode(world, 0.0, 1.0)
 	world = core.ObjectList{bvh}
 
-	groundMaterial := core.NewLambertian(color3(0.5, 0.5, 0.5))
+	groundMaterial := core.NewLambertian(core.NewSolidColorRGB(0.5, 0.5, 0.5))
 	world = append(world, core.NewSphere(point3(0, -1000, 0), 1000, groundMaterial))
 
 	material1 := core.NewDielectric(1.5)
-	material2 := core.NewLambertian(color3(0.4, 0.2, 0.1))
+	material2 := core.NewLambertian(core.NewSolidColorRGB(0.4, 0.2, 0.1))
 	material3 := core.NewMetal(color3(0.7, 0.6, 0.5), 0.0)
 	world = append(world,
 		core.NewSphere(point3(0, 1, 0), 1.0, material1),
@@ -99,13 +99,18 @@ func randomScene() core.ObjectList {
 }
 
 func testScene() core.ObjectList {
+	groundTextture := core.NewCheckerTexture(core.NewSolidColorRGB(0.2, 0.3, 0.1), core.NewSolidColorRGB(0.9, 0.9, 0.9))
 	world := core.ObjectList{
-		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(color3(0.1, 0.2, 0.5))),
-		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(color3(0.8, 0.8, 0.0))),
+		core.NewSphere(point3(0, -100.5, -1), 100, core.NewLambertian(groundTextture)),
+
+		core.NewSphere(point3(0, 0, 0), 0.7, core.NewLambertian(core.NewSolidColorRGB(0.1, 0.2, 0.5))),
+
 		core.NewSphere(point3(0, 0, -1.2), 0.5, core.NewMetal(color3(0.8, 0.6, 0.2), 0.3)),
+
 		core.NewSphere(point3(-1, 0.5, 1), 1.0, core.NewDielectric(1.5)),
 		core.NewSphere(point3(-1, 0.5, 1), -0.9, core.NewDielectric(1.5)),
-		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(color3(0.0, 0.8, 0.8)), -4.0, 5.0),
+
+		core.NewMovingSphere(point3(2, -0.3, 1), point3(2, -0.3, -1), 0.2, core.NewLambertian(core.NewSolidColorRGB(0.0, 0.8, 0.8)), -4.0, 5.0),
 	}
 
 	bvh := core.NewBvhNode(world, 0.0, 1.0)

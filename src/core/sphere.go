@@ -50,3 +50,11 @@ func (s *sphere) BoundingBox(t0, t1 double) (bool, *Aabb) {
 		s.center.Sub(NewVec3(radius, radius, radius)),
 		s.center.Add(NewVec3(radius, radius, radius)))
 }
+
+func getSphereUv(p Vec3) (double, double) {
+	phi := math.Atan2(p.Z, p.X)
+	theta := math.Asin(p.Y)
+	u := 1 - (phi+math.Pi)/(2*math.Pi)
+	v := (theta + math.Pi/2) / math.Pi
+	return u, v
+}

@@ -10,16 +10,16 @@ type Material interface {
 }
 
 type lambertian struct {
-	Albedo *Vec3
+	Albedo Texture
 }
 
-func NewLambertian(albedo *Vec3) *lambertian {
+func NewLambertian(albedo Texture) *lambertian {
 	return &lambertian{albedo}
 }
 
 func (l *lambertian) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, *Vec3) {
 	scatterDirection := hr.Normal.Add(randomOnUnitShpere())
-	return true, NewRay(hr.P, scatterDirection, r.Time), l.Albedo
+	return true, NewRay(hr.P, scatterDirection, r.Time), l.Albedo.Value(hr.u, hr.v, hr.P)
 }
 
 type metal struct {

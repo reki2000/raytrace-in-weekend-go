@@ -54,6 +54,7 @@ type HitRecord struct {
 	Normal    *Vec3
 	FrontFace bool
 	Mat       Material
+	u, v      double
 }
 
 func NewHitRecord(t double, p *Vec3, r *Ray, outwardNormal *Vec3, material Material) *HitRecord {
