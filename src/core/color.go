@@ -1,26 +1,26 @@
 package core
 
-import "math/rand"
-
 type Color struct {
-	R, G, B double
+	R, G, B Double
 }
 
-func NewColor(r, g, b double) Color {
+func NewColor(r, g, b Double) Color {
 	return Color{r, g, b}
 }
 
-func NewColorRandom(min, max double) Color {
-	return Color{rand.Float64()*(max-min) + min,
-		rand.Float64()*(max-min) + min,
-		rand.Float64()*(max-min) + min}
+func NewColorRandom(min, max Double) Color {
+	return Color{
+		randomDoubleW(min, max),
+		randomDoubleW(min, max),
+		randomDoubleW(min, max),
+	}
 }
 
 func (c Color) MulVec(x Color) Color {
 	return Color{c.R * x.R, c.G * x.G, c.B * x.B}
 }
 
-func (c Color) Mul(n double) Color {
+func (c Color) Mul(n Double) Color {
 	return Color{c.R * n, c.G * n, c.B * n}
 }
 

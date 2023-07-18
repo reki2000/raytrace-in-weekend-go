@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-type Perlin struct {
+type perlinNoise struct {
 	pointCount      int
 	permX           []int
 	permY           []int
@@ -14,7 +14,7 @@ type Perlin struct {
 	turbulanceDepth int
 }
 
-func NewPerlin() *Perlin {
+func newPerlinNoise() *perlinNoise {
 	pointCount := 256
 	series := generateSeries(pointCount)
 	permX := permutate(series)
@@ -29,7 +29,7 @@ func NewPerlin() *Perlin {
 
 	turbulanceDepth := 7
 
-	return &Perlin{pointCount, permX, permY, permZ, randomVec, turbulanceDepth}
+	return &perlinNoise{pointCount, permX, permY, permZ, randomVec, turbulanceDepth}
 }
 
 func generateSeries(count int) []int {
@@ -49,7 +49,7 @@ func permutate(slice []int) []int {
 	return slice
 }
 
-func perlinInterporlate(c [2][2][2]Vec3, u, v, w double) double {
+func perlinInterporlate(c [2][2][2]Vec3, u, v, w Double) Double {
 	// 3d hermite cubic
 	uu := u * u * (3 - 2*u)
 	vv := v * v * (3 - 2*v)
@@ -59,10 +59,10 @@ func perlinInterporlate(c [2][2][2]Vec3, u, v, w double) double {
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 2; j++ {
 			for k := 0; k < 2; k++ {
-				ii := double(i)
-				jj := double(j)
-				kk := double(k)
-				weight := NewVec3(u-ii, v-jj, w-kk)
+				ii := Double(i)
+				jj := Double(j)
+				kk := Double(k)
+				weight := vec3(u-ii, v-jj, w-kk)
 				accum += (ii*uu + (1-ii)*(1-uu)) *
 					(jj*vv + (1-jj)*(1-vv)) *
 					(kk*ww + (1-kk)*(1-ww)) * weight.dot(c[i][j][k])
@@ -72,7 +72,7 @@ func perlinInterporlate(c [2][2][2]Vec3, u, v, w double) double {
 	return accum
 }
 
-func (perlin Perlin) Noise(p Vec3) double {
+func (perlin perlinNoise) noise(p Vec3) Double {
 	u := p.x - math.Floor(p.x)
 	v := p.y - math.Floor(p.y)
 	w := p.z - math.Floor(p.z)
@@ -102,12 +102,12 @@ func (perlin Perlin) Noise(p Vec3) double {
 
 }
 
-func (perlin *Perlin) Turbulance(p Vec3) double {
+func (perlin *perlinNoise) turbulance(p Vec3) Double {
 	accum := 0.0
 	tempP := p
 	weight := 1.0
 	for i := 0; i < perlin.turbulanceDepth; i++ {
-		accum += weight * perlin.Noise(tempP)
+		accum += weight * perlin.noise(tempP)
 		weight *= 0.5
 		tempP = tempP.mul(2)
 	}

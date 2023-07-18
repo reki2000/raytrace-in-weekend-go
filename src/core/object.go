@@ -1,21 +1,21 @@
 package core
 
 type Object interface {
-	Hit(r *Ray, tMin, tMax double) (bool, *HitRecord)
-	BoundingBox(t0, t1 double) (bool, *Aabb)
+	hit(r *Ray, tMin, tMax Double) (bool, *hitRecord)
+	boundingBox(t0, t1 Double) (bool, *aabb)
 }
 
 type ObjectList []Object
 
-func (objs ObjectList) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
+func (objs ObjectList) hit(r *Ray, tMin, tMax Double) (bool, *hitRecord) {
 	hitAny := false
 	closestSoFar := tMax
-	var hitRecord *HitRecord
+	var hitRecord *hitRecord
 
 	for _, obj := range objs {
-		if hit, hr := obj.Hit(r, tMin, closestSoFar); hit {
+		if hit, hr := obj.hit(r, tMin, closestSoFar); hit {
 			hitAny = true
-			closestSoFar = hr.T
+			closestSoFar = hr.t
 			hitRecord = hr
 		}
 	}
@@ -23,16 +23,16 @@ func (objs ObjectList) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 	return hitAny, hitRecord
 }
 
-func (objs ObjectList) BoundingBox(t0, t1 double) (bool, *Aabb) {
+func (objs ObjectList) boundingBox(t0, t1 Double) (bool, *aabb) {
 	if len(objs) == 0 {
 		return false, nil
 	}
 
-	var outputBox *Aabb
+	var outputBox *aabb
 	firstBox := true
 
 	for _, obj := range objs {
-		ok, tempBox := obj.BoundingBox(t0, t1)
+		ok, tempBox := obj.boundingBox(t0, t1)
 		if !ok {
 			return false, nil
 		}
@@ -40,7 +40,7 @@ func (objs ObjectList) BoundingBox(t0, t1 double) (bool, *Aabb) {
 		if firstBox {
 			outputBox = tempBox
 		} else {
-			outputBox = NewSurroundingBox(outputBox, tempBox)
+			outputBox = newSurroundingBox(outputBox, tempBox)
 		}
 		firstBox = false
 	}
@@ -48,26 +48,26 @@ func (objs ObjectList) BoundingBox(t0, t1 double) (bool, *Aabb) {
 	return true, outputBox
 }
 
-type HitRecord struct {
-	T         double
-	P         Vec3
-	Normal    Vec3
-	FrontFace bool
-	Mat       Material
-	u, v      double
+type hitRecord struct {
+	t         Double
+	p         Vec3
+	normal    Vec3
+	frontFace bool
+	material  Material
+	u, v      Double
 }
 
-func NewHitRecord(t double, p Vec3, u, v double, r *Ray, outwardNormal Vec3, material Material) *HitRecord {
-	hr := &HitRecord{T: t, P: p, Mat: material, u: u, v: v}
+func newHitRecord(t Double, p Vec3, u, v Double, r *Ray, outwardNormal Vec3, material Material) *hitRecord {
+	hr := &hitRecord{t: t, p: p, material: material, u: u, v: v}
 	hr.setFaceNormal(r, outwardNormal)
 	return hr
 }
 
-func (hr *HitRecord) setFaceNormal(r *Ray, outwardNormal Vec3) {
-	hr.FrontFace = r.Direction.dot(outwardNormal) < 0
-	if hr.FrontFace {
-		hr.Normal = outwardNormal
+func (hr *hitRecord) setFaceNormal(r *Ray, outwardNormal Vec3) {
+	hr.frontFace = r.Direction.dot(outwardNormal) < 0
+	if hr.frontFace {
+		hr.normal = outwardNormal
 	} else {
-		hr.Normal = outwardNormal.inv()
+		hr.normal = outwardNormal.inv()
 	}
 }

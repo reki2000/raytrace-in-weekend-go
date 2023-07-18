@@ -9,8 +9,8 @@ func RayColor(r *Ray, world ObjectList, depth int) Color {
 		return black
 	}
 
-	if hit, hr := world.Hit(r, 0.001, math.Inf(0)); hit {
-		if scattered, scatter, attenuation := hr.Mat.Scatter(r, hr); scattered {
+	if hit, hr := world.hit(r, 0.001, math.Inf(0)); hit {
+		if scattered, scatter, attenuation := hr.material.scatter(r, hr); scattered {
 			return RayColor(scatter, world, depth-1).MulVec(attenuation)
 		} else {
 			return black

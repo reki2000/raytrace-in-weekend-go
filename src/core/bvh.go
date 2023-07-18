@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-type BvhNode struct {
+type bvhNode struct {
 	left, right Object
-	box         *Aabb
+	box         *aabb
 }
 
-func createBoxComparator(axis int, time0, time1 double) func(a, b Object) int {
+func createBoxComparator(axis int, time0, time1 Double) func(a, b Object) int {
 	return func(a, b Object) int {
-		okA, boxA := a.BoundingBox(time0, time1)
-		okB, boxB := b.BoundingBox(time0, time1)
+		okA, boxA := a.boundingBox(time0, time1)
+		okB, boxB := b.boundingBox(time0, time1)
 		if !okA || !okB {
 			panic("no bounding box in bvh_node constructor")
 		}
 
-		debug("comparing %v %v", boxA.Min, boxB.Min)
-		diff := boxA.Min.e(axis) - boxB.Min.e(axis)
+		debug("comparing %v %v", boxA.min, boxB.min)
+		diff := boxA.min.e(axis) - boxB.min.e(axis)
 		if diff < 0.0 {
 			return -1
 		} else if diff > 0.0 {
@@ -31,7 +31,7 @@ func createBoxComparator(axis int, time0, time1 double) func(a, b Object) int {
 	}
 }
 
-func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
+func NewBvhNode(objects ObjectList, time0, time1 Double) *bvhNode {
 	debug("NewBvhNode %v", objects)
 
 	axis := rand.Int() % 3
@@ -68,50 +68,50 @@ func NewBvhNode(objects ObjectList, time0, time1 double) *BvhNode {
 		right = NewBvhNode(objects[mid:], time0, time1)
 	}
 
-	leftOk, boxLeft := left.BoundingBox(time0, time1)
-	rightOk, boxRight := right.BoundingBox(time0, time1)
+	leftOk, boxLeft := left.boundingBox(time0, time1)
+	rightOk, boxRight := right.boundingBox(time0, time1)
 	if !leftOk || !rightOk {
 		panic("no bounding box in bvh_node constructor")
 	}
 
-	box := NewSurroundingBox(boxLeft, boxRight)
-	return &BvhNode{left: left, right: right, box: box}
+	box := newSurroundingBox(boxLeft, boxRight)
+	return &bvhNode{left: left, right: right, box: box}
 }
 
-func (b *BvhNode) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
-	if !b.box.Hit(r, tMin, tMax) {
+func (b *bvhNode) hit(r *Ray, tMin, tMax Double) (bool, *hitRecord) {
+	if !b.box.hit(r, tMin, tMax) {
 		return false, nil
 	}
 
-	hitLeft, hrLeft := b.left.Hit(r, tMin, tMax)
+	hitLeft, hrLeft := b.left.hit(r, tMin, tMax)
 	if hitLeft {
-		tMax = hrLeft.T
+		tMax = hrLeft.t
 	}
 
-	if hitRight, hrRight := b.right.Hit(r, tMin, tMax); hitRight {
+	if hitRight, hrRight := b.right.hit(r, tMin, tMax); hitRight {
 		return hitRight, hrRight
 	}
 
 	return hitLeft, hrLeft
 }
 
-func (b *BvhNode) BoundingBox(t0, t1 double) (bool, *Aabb) {
+func (b *bvhNode) boundingBox(t0, t1 Double) (bool, *aabb) {
 	return true, b.box
 }
 
-func (b *BvhNode) String() string {
+func (b *bvhNode) String() string {
 	return b.Show(0)
 }
 
-func (b *BvhNode) Show(indent int) string {
+func (b *bvhNode) Show(indent int) string {
 	buf := fmt.Sprintf("%s [[%0.2f,%0.2f,%0.2f], [%0.2f,%0.2f,%0.2f]],\n",
 		strings.Repeat(" ", indent),
-		b.box.Min.x, b.box.Min.y, b.box.Min.z,
-		b.box.Max.x, b.box.Max.y, b.box.Max.z)
-	if node, ok := b.left.(*BvhNode); ok {
+		b.box.min.x, b.box.min.y, b.box.min.z,
+		b.box.max.x, b.box.max.y, b.box.max.z)
+	if node, ok := b.left.(*bvhNode); ok {
 		buf += node.Show(indent + 1)
 	}
-	if node, ok := b.right.(*BvhNode); ok {
+	if node, ok := b.right.(*bvhNode); ok {
 		buf += node.Show(indent + 1)
 	}
 	return buf

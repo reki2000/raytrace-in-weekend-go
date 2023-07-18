@@ -15,13 +15,17 @@ import (
 	"github.com/reki2000/raytrace-in-weekend-go/src/core"
 )
 
-type double = float64
+type Double = core.Double
 
-func c3(r, g, b double) core.Color {
+func randomDouble() Double {
+	return rand.Float64()
+}
+
+func c3(r, g, b Double) core.Color {
 	return core.NewColor(r, g, b)
 }
 
-func p3(x, y, z double) core.Vec3 {
+func p3(x, y, z Double) core.Vec3 {
 	return core.NewVec3(x, y, z)
 }
 
@@ -30,8 +34,8 @@ func randomScene() core.ObjectList {
 
 	for a := -11; a < 11; a++ {
 		for b := -11; b < 11; b++ {
-			chooseMat := rand.Float64()
-			center := p3(double(a)+0.9*rand.Float64(), 0.2, double(b)+0.9*rand.Float64())
+			chooseMat := randomDouble()
+			center := p3(Double(a)+0.9*randomDouble(), 0.2, Double(b)+0.9*randomDouble())
 
 			if center.Sub(p3(4, 0.2, 0)).Length() > 0.9 {
 				var material core.Material
@@ -42,7 +46,7 @@ func randomScene() core.ObjectList {
 				} else if chooseMat < 0.95 {
 					// metal
 					albedo := core.NewColorRandom(0.5, 1)
-					fuzz := rand.Float64() * 0.5
+					fuzz := randomDouble() * 0.5
 					material = core.NewMetal(albedo, fuzz)
 				} else {
 					// glass
@@ -119,7 +123,7 @@ func main() {
 	// canvas settings
 	aspectRatio := 16.0 / 9.0
 	imageWidth := 384
-	imageHeight := int(double(imageWidth) / aspectRatio)
+	imageHeight := int(Double(imageWidth) / aspectRatio)
 
 	// camera settings
 	vfovDegree := 90.0
@@ -150,8 +154,8 @@ func main() {
 			pixelColor := c3(0, 0, 0)
 
 			for s := 0; s < samples; s++ {
-				u := (double(i) + rand.Float64()) / double(imageWidth-1)
-				v := (double(j) + rand.Float64()) / double(imageHeight-1)
+				u := (Double(i) + randomDouble()) / Double(imageWidth-1)
+				v := (Double(j) + randomDouble()) / Double(imageHeight-1)
 				r := camera.GetRay(u, v)
 
 				pixelColor = pixelColor.Add(core.RayColor(r, world, maxDepth))
@@ -166,8 +170,8 @@ func main() {
 }
 
 func antiAlias(c core.Color, samples int) (uint8, uint8, uint8) {
-	r := uint8(math.Min(math.Sqrt(c.R/double(samples)), 0.999) * 256.0)
-	g := uint8(math.Min(math.Sqrt(c.G/double(samples)), 0.999) * 256.0)
-	b := uint8(math.Min(math.Sqrt(c.B/double(samples)), 0.999) * 256.0)
+	r := uint8(math.Min(math.Sqrt(c.R/Double(samples)), 0.999) * 256.0)
+	g := uint8(math.Min(math.Sqrt(c.G/Double(samples)), 0.999) * 256.0)
+	b := uint8(math.Min(math.Sqrt(c.B/Double(samples)), 0.999) * 256.0)
 	return r, g, b
 }

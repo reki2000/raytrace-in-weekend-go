@@ -2,11 +2,10 @@ package core
 
 import (
 	"math"
-	"math/rand"
 )
 
 type Material interface {
-	Scatter(r *Ray, hr *HitRecord) (bool, *Ray, Color)
+	scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color)
 }
 
 type lambertian struct {
@@ -17,17 +16,17 @@ func NewLambertian(albedo Texture) *lambertian {
 	return &lambertian{albedo}
 }
 
-func (l *lambertian) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, Color) {
-	scatterDirection := hr.Normal.add(randomOnUnitShpere())
-	return true, NewRay(hr.P, scatterDirection, r.Time), l.Albedo.Value(hr.u, hr.v, hr.P)
+func (l *lambertian) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
+	scatterDirection := hr.normal.add(randomOnUnitShpere())
+	return true, NewRay(hr.p, scatterDirection, r.Time), l.Albedo.value(hr.u, hr.v, hr.p)
 }
 
 type metal struct {
 	Albedo Color
-	Fuzz   double
+	Fuzz   Double
 }
 
-func NewMetal(albedo Color, fuzz double) *metal {
+func NewMetal(albedo Color, fuzz Double) *metal {
 	if fuzz < 1 {
 		return &metal{albedo, fuzz}
 	} else {
@@ -35,10 +34,17 @@ func NewMetal(albedo Color, fuzz double) *metal {
 	}
 }
 
-func (m *metal) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, Color) {
-	reflected := r.Direction.norm().reflect(hr.Normal)
-	scattered := NewRay(hr.P, reflected.add(randomOnUnitShpere().mul(m.Fuzz)), r.Time)
-	if (scattered.Direction.dot(hr.Normal)) > 0 {
+func randomOnUnitShpere() Vec3 {
+	a := randomDouble() * 2.0 * math.Pi
+	z := randomDouble()*2.0 - 1.0
+	r := math.Sqrt(1 - z*z)
+	return vec3(r*math.Cos(a), r*math.Sin(a), z)
+}
+
+func (m *metal) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
+	reflected := r.Direction.norm().reflect(hr.normal)
+	scattered := NewRay(hr.p, reflected.add(randomOnUnitShpere().mul(m.Fuzz)), r.Time)
+	if (scattered.Direction.dot(hr.normal)) > 0 {
 		return true, scattered, m.Albedo
 	} else {
 		return false, nil, Color{}
@@ -46,42 +52,42 @@ func (m *metal) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, Color) {
 }
 
 type dielectric struct {
-	RefIdx double
+	RefIdx Double
 }
 
-func NewDielectric(refIdx double) *dielectric {
+func NewDielectric(refIdx Double) *dielectric {
 	return &dielectric{refIdx}
 }
 
 var white = NewColor(1.0, 1.0, 1.0)
 
-func (d *dielectric) Scatter(r *Ray, hr *HitRecord) (bool, *Ray, Color) {
-	var etaIOverEtaT double
-	if hr.FrontFace {
+func (d *dielectric) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
+	var etaIOverEtaT Double
+	if hr.frontFace {
 		etaIOverEtaT = 1.0 / d.RefIdx
 	} else {
 		etaIOverEtaT = d.RefIdx
 	}
 
 	unitDirection := r.Direction.norm()
-	cosTheta := math.Min(unitDirection.inv().dot(hr.Normal), 1.0)
+	cosTheta := math.Min(unitDirection.inv().dot(hr.normal), 1.0)
 	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 	if etaIOverEtaT*sinTheta > 1.0 {
-		reflected := unitDirection.reflect(hr.Normal)
-		return true, NewRay(hr.P, reflected, r.Time), white
+		reflected := unitDirection.reflect(hr.normal)
+		return true, NewRay(hr.p, reflected, r.Time), white
 	}
 
 	reflectProb := schlick(cosTheta, etaIOverEtaT)
-	if rand.Float64() < reflectProb {
-		reflected := unitDirection.reflect(hr.Normal)
-		return true, NewRay(hr.P, reflected, r.Time), white
+	if randomDouble() < reflectProb {
+		reflected := unitDirection.reflect(hr.normal)
+		return true, NewRay(hr.p, reflected, r.Time), white
 	}
 
-	refracted := unitDirection.refract(hr.Normal, etaIOverEtaT)
-	return true, NewRay(hr.P, refracted, r.Time), white
+	refracted := unitDirection.refract(hr.normal, etaIOverEtaT)
+	return true, NewRay(hr.p, refracted, r.Time), white
 }
 
-func schlick(cosine double, refIdx double) double {
+func schlick(cosine Double, refIdx Double) Double {
 	r0 := (1 - refIdx) / (1 + refIdx)
 	r0 = r0 * r0
 	return r0 + (1-r0)*math.Pow((1-cosine), 5)

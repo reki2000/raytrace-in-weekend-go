@@ -2,7 +2,6 @@ package core
 
 import (
 	"math"
-	"math/rand"
 )
 
 type Camera struct {
@@ -10,15 +9,15 @@ type Camera struct {
 	LowerLeftCorner Vec3
 	horizontal      Vec3
 	vertical        Vec3
-	lensRadius      double
+	lensRadius      Double
 	u, v, w         Vec3
-	time0, time1    double
+	time0, time1    Double
 }
 
 func NewCamera(
-	aspectRatio, vfov, aperture, focusDist double,
+	aspectRatio, vfov, aperture, focusDist Double,
 	lookFrom, lookAt, vup Vec3,
-	time0, time1 double) *Camera {
+	time0, time1 Double) *Camera {
 	theta := vfov * math.Pi / 180
 	h := math.Tan(theta / 2)
 
@@ -38,18 +37,18 @@ func NewCamera(
 	return &Camera{origin, lowerLeftCorner, horizontal, vertical, aperture / 2, u, v, w, time0, time1}
 }
 
-func (c *Camera) GetRay(u, v double) *Ray {
+func (c *Camera) GetRay(u, v Double) *Ray {
 	rd := randomInUnitDisk().mul(c.lensRadius)
 	offset := c.u.mul(rd.x).add(c.v.mul(rd.y))
 
 	return NewRay(
 		c.Origin.add(offset),
 		c.LowerLeftCorner.add(c.horizontal.mul(u)).add(c.vertical.mul(v)).sub(c.Origin).sub(offset),
-		rand.Float64()*(c.time1-c.time0)+c.time0)
+		randomDouble()*(c.time1-c.time0)+c.time0)
 }
 
 func randomInUnitDisk() Vec3 {
-	a := rand.Float64() * 2.0 * math.Pi
-	r := rand.Float64()
-	return NewVec3(r*math.Cos(a), r*math.Sin(a), 0)
+	a := randomDouble() * 2.0 * math.Pi
+	r := randomDouble()
+	return vec3(r*math.Cos(a), r*math.Sin(a), 0)
 }

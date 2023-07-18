@@ -6,7 +6,7 @@ import (
 )
 
 type Texture interface {
-	Value(u, v float64, p Vec3) Color
+	value(u, v Double, p Vec3) Color
 }
 
 // SolidColor
@@ -18,7 +18,7 @@ func NewSolidColor(rgb Color) *SolidColor {
 	return &SolidColor{rgb}
 }
 
-func (sc *SolidColor) Value(u, v float64, p Vec3) Color {
+func (sc *SolidColor) value(u, v Double, p Vec3) Color {
 	return sc.Color
 }
 
@@ -31,42 +31,42 @@ func NewCheckerTexture(odd, even Texture) *CheckerTexture {
 	return &CheckerTexture{odd, even}
 }
 
-func (ct *CheckerTexture) Value(u, v float64, p Vec3) Color {
+func (ct *CheckerTexture) value(u, v Double, p Vec3) Color {
 	sines := math.Sin(10*p.x) * math.Sin(10*p.y) * math.Sin(10*p.z)
 	if sines < 0 {
-		return ct.odd.Value(u, v, p)
+		return ct.odd.value(u, v, p)
 	} else {
-		return ct.even.Value(u, v, p)
+		return ct.even.value(u, v, p)
 	}
 }
 
 // Noise
 type NoiseTexture struct {
-	scale  float64
-	perlin Perlin
+	scale  Double
+	perlin perlinNoise
 }
 
-func NewNoiseTexture(scale float64) *NoiseTexture {
-	return &NoiseTexture{scale, *NewPerlin()}
+func NewNoiseTexture(scale Double) *NoiseTexture {
+	return &NoiseTexture{scale, *newPerlinNoise()}
 }
 
-func (nt *NoiseTexture) Value(u, v float64, p Vec3) Color {
-	return NewColor(0.5, 0.5, 0.5).Mul(1 + nt.perlin.Noise(p.mul(nt.scale)))
+func (nt *NoiseTexture) value(u, v Double, p Vec3) Color {
+	return NewColor(0.5, 0.5, 0.5).Mul(1 + nt.perlin.noise(p.mul(nt.scale)))
 }
 
 // TurbulanceNoise (marble)
 type TurbulanceNoiseTexture struct {
-	scale  float64
-	period float64
-	perlin Perlin
+	scale  Double
+	period Double
+	perlin perlinNoise
 }
 
-func NewTurbulanceNoiseTexture(scale float64, period float64) *TurbulanceNoiseTexture {
-	return &TurbulanceNoiseTexture{scale, period, *NewPerlin()}
+func NewTurbulanceNoiseTexture(scale Double, period Double) *TurbulanceNoiseTexture {
+	return &TurbulanceNoiseTexture{scale, period, *newPerlinNoise()}
 }
 
-func (nt *TurbulanceNoiseTexture) Value(u, v float64, p Vec3) Color {
-	return NewColor(0.5, 0.5, 0.5).Mul(1 + math.Sin(nt.scale*p.z+nt.period*nt.perlin.Turbulance(p)))
+func (nt *TurbulanceNoiseTexture) value(u, v Double, p Vec3) Color {
+	return NewColor(0.5, 0.5, 0.5).Mul(1 + math.Sin(nt.scale*p.z+nt.period*nt.perlin.turbulance(p)))
 }
 
 // Image
@@ -82,13 +82,13 @@ func NewImageTexture(src image.Image) *ImageTexture {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			r, g, b, _ := src.At(x, y).RGBA()
-			data[y*width+x] = NewColor(double(r)/65535, double(g)/65535, double(b)/65535)
+			data[y*width+x] = NewColor(Double(r)/65535, Double(g)/65535, Double(b)/65535)
 		}
 	}
 	return &ImageTexture{width, height, data}
 }
 
-func (it *ImageTexture) Value(u, v float64, p Vec3) Color {
+func (it *ImageTexture) value(u, v Double, p Vec3) Color {
 	if it.data == nil {
 		return NewColor(0, 1, 1)
 	}
@@ -96,8 +96,8 @@ func (it *ImageTexture) Value(u, v float64, p Vec3) Color {
 	u = clamp(u, 0, 1)
 	v = 1 - clamp(v, 0, 1)
 
-	i := int(u * double(it.width))
-	j := int(v * double(it.height))
+	i := int(u * Double(it.width))
+	j := int(v * Double(it.height))
 
 	if i >= it.width {
 		i = it.width - 1
@@ -109,7 +109,7 @@ func (it *ImageTexture) Value(u, v float64, p Vec3) Color {
 	return it.data[j*it.width+i]
 }
 
-func clamp(x, min, max double) double {
+func clamp(x, min, max Double) Double {
 	if x < min {
 		return min
 	}

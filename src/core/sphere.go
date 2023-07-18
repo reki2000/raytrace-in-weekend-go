@@ -4,15 +4,15 @@ import "math"
 
 type sphere struct {
 	center   Vec3
-	radius   double
+	radius   Double
 	material Material
 }
 
-func NewSphere(center Vec3, radius double, mat Material) *sphere {
+func NewSphere(center Vec3, radius Double, mat Material) *sphere {
 	return &sphere{center, radius, mat}
 }
 
-func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
+func (s *sphere) hit(r *Ray, tMin, tMax Double) (bool, *hitRecord) {
 	// (P(t) - C) * (P(t) - C) = r^2
 	// (A + tb - C) * (A + tb - C) = r^2
 	// t^2 b^2 + 2tb(A-C) + (A-C)(A-C) - r^2 = 0
@@ -31,7 +31,7 @@ func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 			p := r.At(temp)
 			outwardNormal := p.sub(center).div(s.radius)
 			u, v := getSphereUv(outwardNormal)
-			return true, NewHitRecord(temp, p, u, v, r, outwardNormal, s.material)
+			return true, newHitRecord(temp, p, u, v, r, outwardNormal, s.material)
 		}
 
 		temp = (-halfB + root) / a
@@ -39,24 +39,54 @@ func (s *sphere) Hit(r *Ray, tMin, tMax double) (bool, *HitRecord) {
 			p := r.At(temp)
 			outwardNormal := p.sub(center).div(s.radius)
 			u, v := getSphereUv(outwardNormal)
-			return true, NewHitRecord(temp, p, u, v, r, outwardNormal, s.material)
+			return true, newHitRecord(temp, p, u, v, r, outwardNormal, s.material)
 		}
 	}
 
 	return false, nil
 }
 
-func (s *sphere) BoundingBox(t0, t1 double) (bool, *Aabb) {
+func (s *sphere) boundingBox(t0, t1 Double) (bool, *aabb) {
 	radius := math.Abs(s.radius)
-	return true, NewAabb(
+	return true, newAabb(
 		s.center.sub(vec3(radius, radius, radius)),
 		s.center.add(vec3(radius, radius, radius)))
 }
 
-func getSphereUv(p Vec3) (double, double) {
+func getSphereUv(p Vec3) (Double, Double) {
 	phi := math.Atan2(p.z, p.x)
 	theta := math.Asin(p.y)
 	u := 1 - (phi+math.Pi)/(2*math.Pi)
 	v := (theta + math.Pi/2) / math.Pi
 	return u, v
+}
+
+// moving sphere
+type movingSphere struct {
+	sphere
+	center2      Vec3
+	time0, time1 Double
+}
+
+func NewMovingSphere(center1, center2 Vec3, radius Double, mat Material, time0, time1 Double) *movingSphere {
+	return &movingSphere{sphere{center1, radius, mat}, center2, time0, time1}
+}
+
+func (s *movingSphere) centerAt(t Double) Vec3 {
+	return s.center.add(s.center2.sub(s.center).mul((s.time1 - t) / (s.time1 - s.time0)))
+}
+
+func (s *movingSphere) hit(r *Ray, tMin, tMax Double) (bool, *hitRecord) {
+	sphere := sphere{s.centerAt(r.Time), s.radius, s.material}
+	return sphere.hit(r, tMin, tMax)
+}
+
+func (s *movingSphere) boundingBox(t0, t1 Double) (bool, *aabb) {
+	aabb0 := newAabb(
+		s.centerAt(t0).sub(vec3(s.radius, s.radius, s.radius)),
+		s.centerAt(t0).add(vec3(s.radius, s.radius, s.radius)))
+	aabb1 := newAabb(
+		s.centerAt(t1).sub(vec3(s.radius, s.radius, s.radius)),
+		s.centerAt(t1).add(vec3(s.radius, s.radius, s.radius)))
+	return true, newSurroundingBox(aabb0, aabb1)
 }
