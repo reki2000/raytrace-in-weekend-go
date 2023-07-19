@@ -11,20 +11,31 @@ func newAabb(a, b Vec3) *aabb {
 }
 
 func (a *aabb) hit(r *Ray, tMin, tMax Double) bool {
-	return hit(a.min.x-r.Origin.x, a.max.x-r.Origin.x, r.invDirection.x, tMin, tMax) &&
-		hit(a.min.y-r.Origin.y, a.max.y-r.Origin.y, r.invDirection.y, tMin, tMax) &&
-		hit(a.min.z-r.Origin.z, a.max.z-r.Origin.z, r.invDirection.z, tMin, tMax)
+	return hitAabb(a.min.x-r.Origin.x, a.max.x-r.Origin.x, r.Direction.x, tMin, tMax) &&
+		hitAabb(a.min.y-r.Origin.y, a.max.y-r.Origin.y, r.Direction.y, tMin, tMax) &&
+		hitAabb(a.min.z-r.Origin.z, a.max.z-r.Origin.z, r.Direction.z, tMin, tMax)
 }
 
-func hit(aabbMin, aabbMax, inv, tMin, tMax Double) bool {
+func hitAabb(aabbMin, aabbMax, dir, tMin, tMax Double) bool {
+	tMin, tMax = tMin*dir, tMax*dir
+
 	var t0, t1 Double
-	if inv < 0.0 {
-		t1 = aabbMin * inv
-		t0 = aabbMax * inv
-	} else {
-		t0 = aabbMin * inv
-		t1 = aabbMax * inv
+	if dir < 0.0 {
+		t1 = aabbMin
+		t0 = aabbMax
+
+		if t0 < tMin {
+			tMin = t0
+		}
+		if t1 > tMax {
+			tMax = t1
+		}
+
+		return tMax < tMin
 	}
+
+	t0 = aabbMin
+	t1 = aabbMax
 
 	if t0 > tMin {
 		tMin = t0
