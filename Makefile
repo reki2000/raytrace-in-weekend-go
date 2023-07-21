@@ -3,10 +3,12 @@ PNG=test.png
 TEST=bin/raytrace.test
 PROF=prof/cpu.prof
 
+SCENE=cornell
+
 loop:
 	while true; do \
 		go build -o $(BIN) ./src \
-		&& time $(BIN) -scene light > tmp.png \
+		&& time $(BIN) -scene $(SCENE) > tmp.png \
 		&& mv tmp.png $(PNG); \
 		sleep 2; \
 	done

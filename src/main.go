@@ -125,6 +125,32 @@ func lightScene() core.ObjectList {
 	}
 }
 
+func cornellBoxSchene() core.ObjectList {
+	red := core.NewLambertian(core.NewSolidColor(c3(0.65, 0.05, 0.05)))
+	white := core.NewLambertian(core.NewSolidColor(c3(0.73, 0.73, 0.73)))
+	green := core.NewLambertian(core.NewSolidColor(c3(0.12, 0.45, 0.15)))
+	light := core.NewDiffuseLight(core.NewSolidColor(c3(15, 15, 15)))
+
+	var box1 core.Object = core.NewBox(p3(0, 0, 0), p3(165, 330, 165), white)
+	box1 = core.NewRotateY(box1, 15)
+	box1 = core.NewTranslate(box1, p3(265, 0, 295))
+
+	var box2 core.Object = core.NewBox(p3(0, 0, 0), p3(165, 165, 165), white)
+	box2 = core.NewRotateY(box2, -18)
+	box2 = core.NewTranslate(box2, p3(130, 0, 65))
+
+	return core.ObjectList{
+		core.NewYZRect(0, 555, 0, 555, 555, green),
+		core.NewYZRect(0, 555, 0, 555, 0, red),
+		core.NewXZRect(213, 343, 227, 332, 554, light),
+		core.NewXZRect(0, 555, 0, 555, 0, white),
+		core.NewXZRect(0, 555, 0, 555, 555, white),
+		core.NewXYRect(0, 555, 0, 555, 555, white),
+
+		box1, box2,
+	}
+}
+
 func main() {
 	scene := flag.String("scene", "random", "scene type")
 	flag.Parse()
@@ -156,11 +182,15 @@ func main() {
 		world = lightScene()
 		backGround = c3(0.0, 0.0, 0.0)
 		camera = core.NewCamera(aspectRatio, vfovDegree, 0.01, 10, p3(40, 5, 4), p3(0, 3, 0), vup, time0, time1)
+	} else if *scene == "cornell" {
+		world = cornellBoxSchene()
+		backGround = c3(0.0, 0.0, 0.0)
+		camera = core.NewCamera(aspectRatio, 40.0, 0.0, 1, p3(278, 278, -800), p3(278, 278, 0), vup, time0, time1)
 	}
 	//fmt.Fprintf(os.Stderr, "world: %s\n", world)
 
 	// ray tracing settings
-	samples := 16
+	samples := 100
 	maxDepth := 10
 
 	// rendering

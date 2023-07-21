@@ -20,6 +20,18 @@ func (v Vec3) e(axis int) Double {
 	panic("invalid axis")
 }
 
+func (v Vec3) newE(axis int, value Double) Vec3 {
+	switch axis {
+	case 0:
+		return vec3(value, v.y, v.z)
+	case 1:
+		return vec3(v.x, value, v.z)
+	case 2:
+		return vec3(v.x, v.y, value)
+	}
+	panic("invalid axis")
+}
+
 func (v Vec3) inv() Vec3          { return vec3(-v.x, -v.y, -v.z) }
 func (v Vec3) add(x Vec3) Vec3    { return vec3(v.x+x.x, v.y+x.y, v.z+x.z) }
 func (v Vec3) sub(x Vec3) Vec3    { return vec3(v.x-x.x, v.y-x.y, v.z-x.z) }
