@@ -1,5 +1,8 @@
 package core
 
+var black = Color{0, 0, 0}
+var white = Color{1.0, 1.0, 1.0}
+
 type Color struct {
 	R, G, B Double
 }

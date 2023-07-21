@@ -6,6 +6,7 @@ import (
 
 type Material interface {
 	scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color)
+	emitted(u, v Double, p Vec3) Color
 }
 
 type lambertian struct {
@@ -20,6 +21,8 @@ func (l *lambertian) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
 	scatterDirection := hr.normal.add(randomOnUnitShpere())
 	return true, NewRay(hr.p, scatterDirection, r.Time), l.Albedo.value(hr.u, hr.v, hr.p)
 }
+
+func (l *lambertian) emitted(u, v Double, p Vec3) Color { return black }
 
 type metal struct {
 	Albedo Color
@@ -51,6 +54,8 @@ func (m *metal) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
 	}
 }
 
+func (m *metal) emitted(u, v Double, p Vec3) Color { return black }
+
 type dielectric struct {
 	RefIdx Double
 }
@@ -58,8 +63,6 @@ type dielectric struct {
 func NewDielectric(refIdx Double) *dielectric {
 	return &dielectric{refIdx}
 }
-
-var white = NewColor(1.0, 1.0, 1.0)
 
 func (d *dielectric) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
 	var etaIOverEtaT Double
@@ -91,4 +94,22 @@ func schlick(cosine Double, refIdx Double) Double {
 	r0 := (1 - refIdx) / (1 + refIdx)
 	r0 = r0 * r0
 	return r0 + (1-r0)*math.Pow((1-cosine), 5)
+}
+
+func (d *dielectric) emitted(u, v Double, p Vec3) Color { return black }
+
+type diffuseLight struct {
+	emit Texture
+}
+
+func NewDiffuseLight(emit Texture) *diffuseLight {
+	return &diffuseLight{emit}
+}
+
+func (d *diffuseLight) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
+	return false, nil, Color{}
+}
+
+func (d *diffuseLight) emitted(u, v Double, p Vec3) Color {
+	return d.emit.value(u, v, p)
 }

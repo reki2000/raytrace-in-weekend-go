@@ -6,7 +6,7 @@ PROF=prof/cpu.prof
 loop:
 	while true; do \
 		go build -o $(BIN) ./src \
-		&& time $(BIN) -scene test > tmp.png \
+		&& time $(BIN) -scene light > tmp.png \
 		&& mv tmp.png $(PNG); \
 		sleep 2; \
 	done

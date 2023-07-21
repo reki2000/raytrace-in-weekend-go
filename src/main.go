@@ -113,6 +113,18 @@ func testScene() core.ObjectList {
 	return core.ObjectList{bvh}
 }
 
+func lightScene() core.ObjectList {
+	noiseTexture := core.NewTurbulanceNoiseTexture(4.0, 20)
+	light := core.NewDiffuseLight(core.NewSolidColor(c3(4, 4, 4)))
+
+	return core.ObjectList{
+		core.NewSphere(p3(0, -1000, 0), 1000, core.NewLambertian(noiseTexture)),
+		core.NewSphere(p3(0, 2, 0), 2, core.NewLambertian(noiseTexture)),
+		core.NewSphere(p3(0, 7, 0), 2, light),
+		core.NewXYRect(3, 5, 1, 3, -2, light),
+	}
+}
+
 func main() {
 	scene := flag.String("scene", "random", "scene type")
 	flag.Parse()
@@ -137,13 +149,18 @@ func main() {
 
 	// locate objetcs
 	world := testScene()
+	backGround := c3(0.7, 0.8, 1.0)
 	if *scene == "random" {
 		world = randomScene()
+	} else if *scene == "light" {
+		world = lightScene()
+		backGround = c3(0.0, 0.0, 0.0)
+		camera = core.NewCamera(aspectRatio, vfovDegree, 0.01, 10, p3(40, 5, 4), p3(0, 3, 0), vup, time0, time1)
 	}
 	//fmt.Fprintf(os.Stderr, "world: %s\n", world)
 
 	// ray tracing settings
-	samples := 32
+	samples := 16
 	maxDepth := 10
 
 	// rendering
@@ -158,7 +175,7 @@ func main() {
 				v := (Double(j) + randomDouble()) / Double(imageHeight-1)
 				r := camera.GetRay(u, v)
 
-				pixelColor = pixelColor.Add(core.RayColor(r, world, maxDepth))
+				pixelColor = pixelColor.Add(core.RayColor(r, backGround, world, maxDepth))
 			}
 
 			r, g, b := antiAlias(pixelColor, samples)
