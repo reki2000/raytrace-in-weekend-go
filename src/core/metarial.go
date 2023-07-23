@@ -113,3 +113,17 @@ func (d *diffuseLight) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
 func (d *diffuseLight) emitted(u, v Double, p Vec3) Color {
 	return d.emit.value(u, v, p)
 }
+
+type isotropic struct {
+	albedo Texture
+}
+
+func NewIsotropic(albedo Texture) *isotropic {
+	return &isotropic{albedo}
+}
+
+func (i *isotropic) scatter(r *Ray, hr *hitRecord) (bool, *Ray, Color) {
+	return true, NewRay(hr.p, randomOnUnitShpere(), r.Time), i.albedo.value(hr.u, hr.v, hr.p)
+}
+
+func (i *isotropic) emitted(u, v Double, p Vec3) Color { return black }
