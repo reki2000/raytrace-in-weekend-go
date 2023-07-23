@@ -83,5 +83,6 @@ func NewVec3Random(min, max Double) Vec3 {
 	)
 }
 
+func (v Vec3) Add(x Vec3) Vec3 { return vec3(v.x+x.x, v.y+x.y, v.z+x.z) }
 func (v Vec3) Sub(x Vec3) Vec3 { return vec3(v.x-x.x, v.y-x.y, v.z-x.z) }
 func (v Vec3) Length() Double  { return math.Sqrt(v.lengthSquared()) }
