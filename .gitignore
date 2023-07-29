@@ -2,3 +2,4 @@
 prof/
 .tool-versions
 bin/
+internal.test

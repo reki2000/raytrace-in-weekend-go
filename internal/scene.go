@@ -1,6 +1,6 @@
 package main
 
-import "github.com/reki2000/raytrace-in-weekend-go/src/core"
+import "github.com/reki2000/raytrace-in-weekend-go/internal/core"
 
 func testScene() core.ObjectList {
 	checkerTextture := core.NewCheckerTexture(core.NewSolidColor(c3(0.2, 0.3, 0.1)), core.NewSolidColor(c3(0.9, 0.9, 0.9)))

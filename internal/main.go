@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/reki2000/raytrace-in-weekend-go/src/core"
+	"github.com/reki2000/raytrace-in-weekend-go/internal/core"
 )
 
 type Double = core.Double
