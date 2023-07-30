@@ -19,29 +19,22 @@ func (a *aabb) hit(r *Ray, tMin, tMax Double) bool {
 func hitAabb(aabbMin, aabbMax, dir, tMin, tMax Double) bool {
 	tMin, tMax = tMin*dir, tMax*dir
 
-	var t0, t1 Double
 	if dir < 0.0 {
-		t1 = aabbMin
-		t0 = aabbMax
-
-		if t0 < tMin {
-			tMin = t0
+		if aabbMax < tMin {
+			tMin = aabbMax
 		}
-		if t1 > tMax {
-			tMax = t1
+		if aabbMin > tMax {
+			tMax = aabbMin
 		}
 
 		return tMax < tMin
 	}
 
-	t0 = aabbMin
-	t1 = aabbMax
-
-	if t0 > tMin {
-		tMin = t0
+	if aabbMin > tMin {
+		tMin = aabbMin
 	}
-	if t1 < tMax {
-		tMax = t1
+	if aabbMax < tMax {
+		tMax = aabbMax
 	}
 
 	return tMax > tMin
