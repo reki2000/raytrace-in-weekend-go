@@ -13,26 +13,31 @@ loop:
 		sleep 2; \
 	done
 
-run:
-	time go run ./internal > $(PNG)
+$(BIN): build
 
-scene_test:
-	time go run ./internal -samples 32 -scene test > $(PNG)
+build: 
+	go build -o $(BIN) ./internal
 
-scene_random:
-	time go run ./internal -samples 64 -scene random > $(PNG)
+run: $(BIN)
+	time $(BIN) > $(PNG)
 
-scene_light:
-	time go run ./internal -scene light > $(PNG)
+scene_test: $(BIN)
+	time $(BIN) -samples 32 -scene test > $(PNG)
 
-scene_cornell:
-	time go run ./internal -samples 100 -aspect 1.0 -scene cornell > $(PNG)
+scene_random: $(BIN)
+	time $(BIN) -samples 64 -scene random > $(PNG)
 
-scene_smoke:
-	time go run ./internal -samples 200 -aspect 1.0 -scene smoke > $(PNG)
+scene_light: $(BIN)
+	time $(BIN) -scene light > $(PNG)
 
-scene_final:
-	time go run ./internal -samples 1000 -aspect 1.0 -scene final > $(PNG)
+scene_cornell: $(BIN)
+	time $(BIN) -samples 100 -aspect 1.0 -scene cornell > $(PNG)
+
+scene_smoke: $(BIN)
+	time $(BIN) -samples 200 -aspect 1.0 -scene smoke > $(PNG)
+
+scene_final: $(BIN)
+	time $(BIN) -samples 1000 -aspect 1.0 -scene final > $(PNG)
 
 
 bench:
@@ -42,4 +47,4 @@ bench:
 prof: bench
 	go tool pprof --text $(TEST) $(PROF)
 
-.PHONY: loop run bench prof
+.PHONY: loop run bench prof build
