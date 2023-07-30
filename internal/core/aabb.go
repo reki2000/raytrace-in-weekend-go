@@ -20,24 +20,10 @@ func hitAabb(aabbMin, aabbMax, dir, tMin, tMax Double) bool {
 	tMin, tMax = tMin*dir, tMax*dir
 
 	if dir < 0.0 {
-		if aabbMax < tMin {
-			tMin = aabbMax
-		}
-		if aabbMin > tMax {
-			tMax = aabbMin
-		}
-
-		return tMax < tMin
+		return aabbMin < tMin || (tMax < aabbMax && aabbMax < tMin)
 	}
 
-	if aabbMin > tMin {
-		tMin = aabbMin
-	}
-	if aabbMax < tMax {
-		tMax = aabbMax
-	}
-
-	return tMax > tMin
+	return aabbMax > tMin || (tMax > aabbMin && aabbMin > tMin)
 }
 
 func newSurroundingBox(box0, box1 *aabb) *aabb {
